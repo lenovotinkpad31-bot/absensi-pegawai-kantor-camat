@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi QR - Kantor Camat</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #f4f4f9; }
+        .container { max-width: 500px; margin: 50px auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        #reader { width: 100%; border-radius: 10px; overflow: hidden; }
+        #status { margin-top: 20px; font-weight: bold; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Scan Absensi Pegawai</h2>
+    <p>Kantor Kecamatan</p>
+    <div id="reader"></div>
+    <div id="status">Siap memindai...</div>
+</div>
+
+<script>
+    // --- KONFIGURASI DATABASE (Ganti dengan URL & Key Supabase Anda) ---
+    const SUPABASE_URL = 'sb_publishable_-nRW19n12GUIzQH2dLV89A_3Zxq461d';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNubWx6aWNkcGdjc2toeWN4cXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2Mjg2MTIsImV4cCI6MjA4ODIwNDYxMn0.LJtCk7Yare4WDqn_5Ub4qF8SSrTfudfVsSd43BpeKxE`;
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function onScanSuccess(decodedText) {
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerText = "Memproses: " + decodedText;
+
+        // Simpan ke Database
+        const { data, error } = await supabase
+            .from('absensi')
+            .insert([{ nama_pegawai: decodedText, waktu: new Date().toLocaleString('id-ID') }]);
+
+        if (error) {
+            statusDiv.innerHTML = "<span style='color:red'>Gagal: " + error.message + "</span>";
+        } else {
+            statusDiv.className = "success";
+            statusDiv.innerText = "Berhasil Absen: " + decodedText;
+            // Bunyi Beep (Opsional)
+            new Audio('https://www.soundjay.com/buttons/beep-07.mp3').play();
+        }
+    }
+
+    let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+    html5QrcodeScanner.render(onScanSuccess);
+</script>
+
+</body>
+</html>

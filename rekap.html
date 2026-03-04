@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rekap Absensi</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center">Daftar Hadir Pegawai</h2>
+    <table id="tabelAbsen">
+        <thead>
+            <tr>
+                <th>Nama Pegawai</th>
+                <th>Waktu Scan</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const SUPABASE_URL = 'sb_publishable_-nRW19n12GUIzQH2dLV89A_3Zxq461d';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNubWx6aWNkcGdjc2toeWN4cXFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2Mjg2MTIsImV4cCI6MjA4ODIwNDYxMn0.LJtCk7Yare4WDqn_5Ub4qF8SSrTfudfVsSd43BpeKxE';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function muatData() {
+            const { data } = await supabase.from('absensi').select('*').order('id', { ascending: false });
+            const tbody = document.querySelector('#tabelAbsen tbody');
+            tbody.innerHTML = data.map(row => `<tr><td>${row.nama_pegawai}</td><td>${row.waktu}</td></tr>`).join('');
+        }
+        
+        muatData();
+        setInterval(muatData, 5000); // Update otomatis tiap 5 detik
+    </script>
+</body>
+</html>
